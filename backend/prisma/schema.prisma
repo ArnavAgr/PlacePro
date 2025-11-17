@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  RECRUITER
+  PLACEMENT_CELL
+}
+
+enum JobStatus {
+  DRAFT
+  PENDING_APPROVAL
+  ACTIVE
+  CLOSED
+}
+
+enum AppStatus {
+  APPLIED
+  REVIEWED
+  SHORTLISTED
+  INTERVIEW_SCHEDULED
+  OFFERED
+  REJECTED
+  ACCEPTED
+  DECLINED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student   Student?
+  recruiter Recruiter?
+}
+
+model Student {
+  userId         String        @id
+  rollNo         String?
+  branch         String?
+  cgpa           Float?
+  resumeFilePath String?
+  user           User          @relation(fields: [userId], references: [id])
+  applications   Application[] // opposite side is Application.student
+}
+
+model Recruiter {
+  userId      String  @id
+  companyName String?
+  user        User    @relation(fields: [userId], references: [id])
+  jobs        Job[] // opposite side is Job.postedBy
+}
+
+model Job {
+  id             String    @id @default(uuid())
+  title          String
+  description    String
+  eligibility    String?
+  deadline       DateTime?
+  postedByUserId String
+  status         JobStatus @default(PENDING_APPROVAL)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // foreign key relation: Job.postedByUserId -> Recruiter.userId
+  postedBy     Recruiter?    @relation(fields: [postedByUserId], references: [userId])
+  applications Application[]
+}
+
+model Application {
+  id             String    @id @default(uuid())
+  jobId          String
+  studentUserId  String
+  status         AppStatus @default(APPLIED)
+  interviewDate  DateTime?
+  resumeFilePath String?
+  appliedAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Foreign keys: these fields own the relations
+  job     Job     @relation(fields: [jobId], references: [id])
+  student Student @relation(fields: [studentUserId], references: [userId])
+  // Offer is the referenced side (Offer holds appId FK), so here we keep it simple:
+  offer   Offer?
+}
+
+model Offer {
+  id        String      @id @default(uuid())
+  appId     String      @unique
+  details   String?
+  status    OfferStatus @default(PENDING)
+  issuedOn  DateTime?
+  updatedAt DateTime    @updatedAt
+
+  // Offer.appId is the FK referencing Application.id
+  application Application @relation(fields: [appId], references: [id])
+}
