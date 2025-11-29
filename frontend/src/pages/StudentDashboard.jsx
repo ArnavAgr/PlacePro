@@ -2,11 +2,17 @@ import React, { useEffect, useState } from 'react';
 import axios from '../services/auth';
 import { Link } from 'react-router-dom';
 import './Dashboard.css';
+import { useAlert } from '../context/AlertContext';
 
 export default function StudentDashboard() {
   const [applications, setApplications] = useState([]);
   const [resume, setResume] = useState(null);
   const [studentProfile, setStudentProfile] = useState(null);
+  const { showAlert } = useAlert();
+
+  // Edit Profile Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({ cgpa: '', skills: '' });
 
   useEffect(() => {
     async function fetchData() {
@@ -19,7 +25,7 @@ export default function StudentDashboard() {
         setStudentProfile(profileRes.data);
       } catch (err) {
         console.error(err);
-        // alert('Failed to fetch data');
+        showAlert('Failed to fetch data', 'error');
       }
     }
     fetchData();
@@ -27,30 +33,51 @@ export default function StudentDashboard() {
 
   async function uploadResume(e) {
     e.preventDefault();
-    if (!resume) return alert('Please select a file');
+    if (!resume) return showAlert('Please select a file', 'warning');
 
     const formData = new FormData();
     formData.append('resume', resume);
     try {
       const res = await axios.post('/students/upload-resume', formData);
-      alert('Resume uploaded successfully');
+      showAlert('Resume uploaded successfully', 'success');
       setStudentProfile(prev => ({ ...prev, resumeFilePath: res.data.filePath }));
     } catch (err) {
       console.error(err);
-      alert('Failed to upload resume');
+      showAlert('Failed to upload resume', 'error');
     }
   }
 
-  async function updateProfile(cgpa, skills) {
+  function openEditModal() {
+    setEditForm({
+      cgpa: studentProfile?.cgpa || '',
+      skills: studentProfile?.skills || ''
+    });
+    setShowEditModal(true);
+  }
+
+  async function submitEditProfile(e) {
+    e.preventDefault();
     try {
-      await axios.put('/students/profile', { cgpa, skills });
-      alert('Profile updated successfully');
+      await axios.put('/students/profile', { cgpa: editForm.cgpa, skills: editForm.skills });
+      showAlert('Profile updated successfully', 'success');
+      setShowEditModal(false);
       // Refresh profile
       const res = await axios.get('/students/profile');
       setStudentProfile(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to update profile');
+      showAlert('Failed to update profile: ' + (err.response?.data?.error || err.message), 'error');
+    }
+  }
+
+  async function respondToOffer(offerId, status) {
+    try {
+      await axios.put(`/offers/${offerId}/respond`, { status });
+      showAlert(`Offer ${status.toLowerCase()} successfully`, 'success');
+      setTimeout(() => window.location.reload(), 1500); // Reload after delay
+    } catch (err) {
+      console.error(err);
+      showAlert('Failed to respond to offer', 'error');
     }
   }
 
@@ -67,11 +94,7 @@ export default function StudentDashboard() {
             <p><strong>Branch:</strong> {studentProfile?.branch || 'N/A'}</p>
             <p><strong>CGPA:</strong> {studentProfile?.cgpa || 'N/A'}</p>
             <p><strong>Skills:</strong> {studentProfile?.skills || 'N/A'}</p>
-            <button className="btn btn-primary" onClick={() => {
-              const newCgpa = prompt('Enter new CGPA:', studentProfile?.cgpa || '');
-              const newSkills = prompt('Enter skills (comma separated):', studentProfile?.skills || '');
-              if (newCgpa !== null && newSkills !== null) updateProfile(newCgpa, newSkills);
-            }}>Edit Profile</button>
+            <button className="btn btn-primary" onClick={openEditModal}>Edit Profile</button>
           </div>
         </div>
 
@@ -127,8 +150,8 @@ export default function StudentDashboard() {
                   <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
                   <td>
                     <span className={`badge ${app.status === 'ACCEPTED' ? 'success' :
-                        app.status === 'REJECTED' ? 'danger' :
-                          app.status === 'OFFERED' ? 'info' : 'warning'
+                      app.status === 'REJECTED' ? 'danger' :
+                        app.status === 'OFFERED' ? 'info' : 'warning'
                       }`}>
                       {app.status}
                     </span>
@@ -148,17 +171,42 @@ export default function StudentDashboard() {
           </table>
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div className="card" style={{ width: '400px', padding: '24px' }}>
+            <h3 style={{ marginTop: 0 }}>Edit Profile</h3>
+            <form onSubmit={submitEditProfile}>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>CGPA</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editForm.cgpa}
+                  onChange={e => setEditForm({ ...editForm, cgpa: e.target.value })}
+                  style={{ width: '100%' }}
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Skills (comma separated)</label>
+                <textarea
+                  value={editForm.skills}
+                  onChange={e => setEditForm({ ...editForm, skills: e.target.value })}
+                  style={{ width: '100%', minHeight: '80px' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-outline">Cancel</button>
+                <button type="submit" className="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-async function respondToOffer(offerId, status) {
-  try {
-    await axios.put(`/offers/${offerId}/respond`, { status });
-    alert(`Offer ${status.toLowerCase()} successfully`);
-    window.location.reload(); // Simple reload to refresh state
-  } catch (err) {
-    console.error(err);
-    alert('Failed to respond to offer');
-  }
 }

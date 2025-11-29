@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../services/auth';
+import { useAlert } from '../context/AlertContext';
 
 export default function ApproveJobs() {
     const [pendingJobs, setPendingJobs] = useState([]);
     const [approvedJobs, setApprovedJobs] = useState([]);
+    const { showAlert } = useAlert();
 
     useEffect(() => {
         fetchJobs();
@@ -19,18 +21,18 @@ export default function ApproveJobs() {
             setApprovedJobs(approvedRes.data);
         } catch (err) {
             console.error(err);
-            // alert('Failed to fetch jobs');
+            showAlert('Failed to fetch jobs', 'error');
         }
     }
 
     async function approveJob(id) {
         try {
             await axios.post(`/jobs/${id}/approve`);
-            alert('Job approved successfully');
+            showAlert('Job approved successfully', 'success');
             fetchJobs(); // Refresh lists
         } catch (err) {
             console.error(err);
-            alert('Failed to approve job');
+            showAlert('Failed to approve job', 'error');
         }
     }
 

@@ -79,14 +79,22 @@ router.get('/profile', verifyToken, async (req, res) => {
 router.put('/profile', verifyToken, async (req, res) => {
   const { cgpa, skills, rollNo, branch } = req.body;
   try {
+    const updateData = {
+      skills,
+      rollNo,
+      branch
+    };
+
+    if (cgpa !== undefined && cgpa !== '') {
+      const parsed = parseFloat(cgpa);
+      if (!isNaN(parsed)) {
+        updateData.cgpa = parsed;
+      }
+    }
+
     const student = await prisma.student.update({
       where: { userId: req.user.userId },
-      data: {
-        cgpa: cgpa ? parseFloat(cgpa) : undefined,
-        skills,
-        rollNo,
-        branch
-      },
+      data: updateData,
     });
     res.json(student);
   } catch (err) {

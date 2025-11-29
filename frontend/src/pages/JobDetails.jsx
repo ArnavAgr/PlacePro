@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../services/auth';
-
 import { getRole } from '../services/auth';
+import { useAlert } from '../context/AlertContext';
 
 export default function JobDetails() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [hasApplied, setHasApplied] = useState(false);
   const role = getRole();
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     async function fetchData() {
@@ -23,7 +24,7 @@ export default function JobDetails() {
         }
       } catch (err) {
         console.error(err);
-        alert('Failed to fetch job details');
+        showAlert('Failed to fetch job details', 'error');
       }
     }
     fetchData();
@@ -32,11 +33,11 @@ export default function JobDetails() {
   async function applyToJob() {
     try {
       await axios.post('/applications/apply', { jobId: id });
-      alert('Applied successfully');
+      showAlert('Applied successfully', 'success');
       setHasApplied(true);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || 'Failed to apply');
+      showAlert(err.response?.data?.error || 'Failed to apply', 'error');
     }
   }
 

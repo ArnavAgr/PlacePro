@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../services/auth';
+import { useAlert } from '../context/AlertContext';
 
 export default function JobsList() {
   const [jobs, setJobs] = useState([]);
   const [appliedJobIds, setAppliedJobIds] = useState(new Set());
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     async function fetchData() {
@@ -17,7 +19,7 @@ export default function JobsList() {
         setAppliedJobIds(appliedIds);
       } catch (err) {
         console.error(err);
-        alert('Failed to fetch data');
+        showAlert('Failed to fetch data', 'error');
       }
     }
     fetchData();
@@ -26,11 +28,11 @@ export default function JobsList() {
   async function applyToJob(jobId) {
     try {
       await axios.post(`/applications/apply`, { jobId });
-      alert('Successfully applied to the job!');
+      showAlert('Successfully applied to the job!', 'success');
       setAppliedJobIds(prev => new Set(prev).add(jobId)); // Update local state
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || 'Failed to apply to job');
+      showAlert(err.response?.data?.error || 'Failed to apply to job', 'error');
     }
   }
 

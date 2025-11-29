@@ -1,24 +1,26 @@
 import React, { useState } from 'react'
 import { login, setToken, setRole } from '../services/auth'
 import { useNavigate } from 'react-router-dom'
+import { useAlert } from '../context/AlertContext'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRoleState] = useState('STUDENT') // Default role is STUDENT
   const nav = useNavigate()
+  const { showAlert } = useAlert()
 
   async function submit(e) {
     e.preventDefault()
     try {
       const data = await login(email, password)
       if (data.role !== role) {
-        alert(`Invalid role selected. You are a ${data.role}, not a ${role}.`)
+        showAlert(`Invalid role selected. You are a ${data.role}, not a ${role}.`, 'error')
         return
       }
       setToken(data.token)
       setRole(data.role)
-      alert('Logged in as ' + data.role)
+      showAlert('Logged in as ' + data.role, 'success')
 
       // Redirect based on role
       if (data.role === 'PLACEMENT_CELL') {
@@ -32,7 +34,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error(err)
-      alert('Login failed: ' + (err.response?.data?.error || err.message))
+      showAlert('Login failed: ' + (err.response?.data?.error || err.message), 'error')
     }
   }
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { useAlert } from '../context/AlertContext';
 
 export default function StudentSignUp() {
   const [email, setEmail] = useState('');
@@ -9,16 +10,17 @@ export default function StudentSignUp() {
   const [branch, setBranch] = useState('');
   const [cgpa, setCgpa] = useState('');
   const nav = useNavigate();
+  const { showAlert } = useAlert();
 
   async function submit(e) {
     e.preventDefault();
     try {
       await axios.post('/students/sign-up', { email, password, rollNo, branch, cgpa });
-      alert('Sign-up successful! You can now log in.');
+      showAlert('Sign-up successful! You can now log in.', 'success');
       nav('/login');
     } catch (err) {
       console.error(err);
-      alert('Sign-up failed: ' + (err.response?.data?.error || err.message));
+      showAlert('Sign-up failed: ' + (err.response?.data?.error || err.message), 'error');
     }
   }
 

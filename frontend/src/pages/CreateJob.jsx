@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
 import axios from '../services/auth';
+import { useAlert } from '../context/AlertContext';
 
 export default function CreateJob() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eligibility, setEligibility] = useState('');
   const [deadline, setDeadline] = useState('');
+  const { showAlert } = useAlert();
 
   async function submit(e) {
     e.preventDefault();
     try {
       await axios.post('/jobs', { title, description, eligibility, deadline });
-      alert('Job created successfully');
+      showAlert('Job created successfully', 'success');
     } catch (err) {
       console.error(err);
-      alert('Failed to create job');
+      showAlert('Failed to create job', 'error');
     }
   }
 

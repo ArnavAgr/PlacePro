@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../services/auth';
+import { useAlert } from '../context/AlertContext';
 
 export default function ManageApplications() {
     const { jobId } = useParams();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { showAlert } = useAlert();
 
     useEffect(() => {
         fetchApplications();
@@ -18,7 +20,7 @@ export default function ManageApplications() {
             setLoading(false);
         } catch (err) {
             console.error(err);
-            alert('Failed to fetch applications');
+            showAlert('Failed to fetch applications', 'error');
             setLoading(false);
         }
     }
@@ -30,11 +32,11 @@ export default function ManageApplications() {
     async function updateStatus(appId, status, extraData = {}) {
         try {
             await axios.patch(`/applications/${appId}/status`, { status, ...extraData });
-            alert(`Status updated to ${status}`);
+            showAlert(`Status updated to ${status}`, 'success');
             fetchApplications(); // Refresh list
         } catch (err) {
             console.error(err);
-            alert('Failed to update status');
+            showAlert('Failed to update status', 'error');
         }
     }
 
@@ -58,12 +60,12 @@ export default function ManageApplications() {
 
         try {
             await axios.post('/offers/create', { appId: selectedAppId, details });
-            alert('Offer created successfully');
+            showAlert('Offer created successfully', 'success');
             setShowOfferModal(false);
             fetchApplications();
         } catch (err) {
             console.error(err);
-            alert('Failed to create offer');
+            showAlert('Failed to create offer', 'error');
         }
     }
 
@@ -91,7 +93,7 @@ export default function ManageApplications() {
                                 <td>{app.status}</td>
                                 <td>
                                     {app.resumeFilePath && (
-                                        <a href={`http://localhost:4000/${app.resumeFilePath.replace(/\\/g, '/')}`} target="_blank" rel="noopener noreferrer">
+                                        <a href={`http://${window.location.hostname}:4000/${app.resumeFilePath.replace(/\\/g, '/')}`} target="_blank" rel="noopener noreferrer">
                                             View Resume
                                         </a>
                                     )}
