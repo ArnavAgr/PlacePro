@@ -54,6 +54,7 @@ model Student {
   rollNo         String?
   branch         String?
   cgpa           Float?
+  skills         String? // Comma-separated skills
   resumeFilePath String?
   user           User          @relation(fields: [userId], references: [id])
   applications   Application[] // opposite side is Application.student
@@ -97,6 +98,8 @@ model Application {
   student Student @relation(fields: [studentUserId], references: [userId])
   // Offer is the referenced side (Offer holds appId FK), so here we keep it simple:
   offer   Offer?
+
+  @@unique([jobId, studentUserId]) // Prevent duplicate applications
 }
 
 model Offer {
