@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import axios, { getRole, logout } from './services/auth';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
+import { AlertProvider } from './context/AlertContext';
+import CustomAlert from './components/CustomAlert';
 
 // Pages
 import Home from './pages/Home';
@@ -16,9 +18,7 @@ import CreateJob from './pages/CreateJob';
 import AdminCreateUser from './pages/AdminCreateUser';
 import ManageApplications from './pages/ManageApplications';
 import ApproveJobs from './pages/ApproveJobs';
-
-import { AlertProvider } from './context/AlertContext';
-import CustomAlert from './components/CustomAlert';
+import Analytics from './pages/Analytics';
 
 export default function App() {
   const [role, setRole] = useState(getRole());
@@ -39,32 +39,38 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<StudentSignUp />} />
+
+          {/* Student Routes */}
           <Route path="/student/dashboard" element={
             <PrivateRoute allowedRoles={['STUDENT']}><StudentDashboard /></PrivateRoute>
-          } />
-          <Route path="/recruiter/dashboard" element={
-            <PrivateRoute allowedRoles={['RECRUITER']}><RecruiterDashboard /></PrivateRoute>
-          } />
-          <Route path="/placement-cell/dashboard" element={
-            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><PlacementCellDashboard /></PrivateRoute>
           } />
           <Route path="/jobs" element={
             <PrivateRoute allowedRoles={['STUDENT']}><JobsList /></PrivateRoute>
           } />
 
-          {/* ... */}
-
-          <Route path="/admin/create-user" element={
-            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><AdminCreateUser /></PrivateRoute>
-          } />
-          <Route path="/admin/approve-jobs" element={
-            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><ApproveJobs /></PrivateRoute>
+          {/* Recruiter Routes */}
+          <Route path="/recruiter/dashboard" element={
+            <PrivateRoute allowedRoles={['RECRUITER']}><RecruiterDashboard /></PrivateRoute>
           } />
           <Route path="/recruiter/create-job" element={
             <PrivateRoute allowedRoles={['RECRUITER']}><CreateJob /></PrivateRoute>
           } />
           <Route path="/recruiter/jobs/:jobId/applications" element={
             <PrivateRoute allowedRoles={['RECRUITER']}><ManageApplications /></PrivateRoute>
+          } />
+
+          {/* Placement Cell Routes */}
+          <Route path="/placement-cell/dashboard" element={
+            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><PlacementCellDashboard /></PrivateRoute>
+          } />
+          <Route path="/admin/create-user" element={
+            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><AdminCreateUser /></PrivateRoute>
+          } />
+          <Route path="/admin/approve-jobs" element={
+            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><ApproveJobs /></PrivateRoute>
+          } />
+          <Route path="/admin/analytics" element={
+            <PrivateRoute allowedRoles={['PLACEMENT_CELL']}><Analytics /></PrivateRoute>
           } />
         </Routes>
       </Layout>

@@ -43,19 +43,24 @@ export default function JobsList() {
         <p>No jobs available</p>
       ) : (
         <ul>
-          {jobs.map(job => (
-            <li key={job.id}>
-              <h4>{job.title}</h4>
-              <p>{job.description}</p>
-              <p>Eligibility: {job.eligibility || 'N/A'}</p>
-              <p>Deadline: {job.deadline ? new Date(job.deadline).toLocaleDateString() : 'N/A'}</p>
-              {appliedJobIds.has(job.id) ? (
-                <button disabled style={{ backgroundColor: '#ccc', cursor: 'not-allowed' }}>Already Applied</button>
-              ) : (
-                <button onClick={() => applyToJob(job.id)}>Apply</button>
-              )}
-            </li>
-          ))}
+          {jobs.map(job => {
+            const isDeadlinePassed = job.deadline && new Date() > new Date(job.deadline);
+            return (
+              <li key={job.id}>
+                <h4>{job.title}</h4>
+                <p>{job.description}</p>
+                <p>Eligibility: {job.eligibility || 'N/A'}</p>
+                <p>Deadline: {job.deadline ? new Date(job.deadline).toLocaleDateString() : 'N/A'}</p>
+                {appliedJobIds.has(job.id) ? (
+                  <button disabled style={{ backgroundColor: '#ccc', cursor: 'not-allowed' }}>Already Applied</button>
+                ) : isDeadlinePassed ? (
+                  <button disabled style={{ backgroundColor: '#e74c3c', cursor: 'not-allowed' }}>Deadline Passed</button>
+                ) : (
+                  <button onClick={() => applyToJob(job.id)}>Apply</button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

@@ -36,6 +36,7 @@ export default function Sidebar({ role }) {
                         <Link to="/placement-cell/dashboard" className={isActive('/placement-cell/dashboard') ? 'active' : ''}>Dashboard</Link>
                         <Link to="/admin/approve-jobs" className={isActive('/admin/approve-jobs') ? 'active' : ''}>Approve Jobs</Link>
                         <Link to="/admin/create-user" className={isActive('/admin/create-user') ? 'active' : ''}>Manage Users</Link>
+                        <Link to="/admin/analytics" className={isActive('/admin/analytics') ? 'active' : ''}>Analytics</Link>
                     </>
                 )}
             </nav>

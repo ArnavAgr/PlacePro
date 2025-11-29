@@ -53,6 +53,8 @@ export default function JobDetails() {
       {role === 'STUDENT' && (
         hasApplied ? (
           <button disabled className="apply-btn" style={{ backgroundColor: '#ccc', cursor: 'not-allowed' }}>Already Applied</button>
+        ) : (job.deadline && new Date() > new Date(job.deadline)) ? (
+          <button disabled className="apply-btn" style={{ backgroundColor: '#e74c3c', cursor: 'not-allowed' }}>Deadline Passed</button>
         ) : (
           <button onClick={applyToJob} className="apply-btn">Apply Now</button>
         )

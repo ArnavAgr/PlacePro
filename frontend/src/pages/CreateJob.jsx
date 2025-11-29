@@ -27,6 +27,7 @@ export default function CreateJob() {
         <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
         <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
         <input placeholder="Eligibility" value={eligibility} onChange={e => setEligibility(e.target.value)} />
+        <div style={{ textAlign: 'left', marginBottom: '8px', color: '#666' }}>Application Deadline</div>
         <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
         <button type="submit">Create Job</button>
       </form>
