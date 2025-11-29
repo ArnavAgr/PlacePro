@@ -56,38 +56,42 @@ export default function StudentDashboard() {
 
   return (
     <div className="dashboard-container">
-      <h2>Student Dashboard</h2>
-      <nav className="dashboard-nav">
-        <Link to="/jobs">View Available Jobs</Link>
-        {/* <Link to="/student/applications">Track Applications</Link> */}
-      </nav>
-      <div className="dashboard-content">
-        <p>Welcome, {studentProfile?.user?.email}!</p>
+      <h2 style={{ marginBottom: '24px', color: 'var(--primary)' }}>Student Dashboard</h2>
 
-        <div className="section">
-          <h3>Profile Details</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        {/* Profile Card */}
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Profile Details</h3>
           <div className="profile-info">
             <p><strong>Roll No:</strong> {studentProfile?.rollNo || 'N/A'}</p>
             <p><strong>Branch:</strong> {studentProfile?.branch || 'N/A'}</p>
             <p><strong>CGPA:</strong> {studentProfile?.cgpa || 'N/A'}</p>
             <p><strong>Skills:</strong> {studentProfile?.skills || 'N/A'}</p>
-            <button onClick={() => {
+            <button className="btn btn-primary" onClick={() => {
               const newCgpa = prompt('Enter new CGPA:', studentProfile?.cgpa || '');
               const newSkills = prompt('Enter skills (comma separated):', studentProfile?.skills || '');
               if (newCgpa !== null && newSkills !== null) updateProfile(newCgpa, newSkills);
             }}>Edit Profile</button>
           </div>
+        </div>
 
-          <h3>Resume</h3>
+        {/* Resume Card */}
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Resume</h3>
           {studentProfile?.resumeFilePath ? (
-            <div className="resume-status success">
-              <p>✅ Resume Uploaded</p>
-              <small>Path: {studentProfile.resumeFilePath}</small>
+            <div className="badge success" style={{ display: 'inline-block', marginBottom: '16px' }}>
+              ✅ Resume Uploaded
             </div>
           ) : (
-            <div className="resume-status warning">
-              <p>⚠️ No resume uploaded. You cannot apply to jobs without a resume.</p>
+            <div className="badge warning" style={{ display: 'inline-block', marginBottom: '16px' }}>
+              ⚠️ No resume uploaded
             </div>
+          )}
+
+          {studentProfile?.resumeFilePath && (
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+              Path: {studentProfile.resumeFilePath}
+            </p>
           )}
 
           <form onSubmit={uploadResume} className="upload-form">
@@ -96,36 +100,53 @@ export default function StudentDashboard() {
               accept=".pdf"
               onChange={e => setResume(e.target.files[0])}
             />
-            <button type="submit">Upload / Replace Resume</button>
+            <button type="submit" className="btn btn-outline">Upload / Replace Resume</button>
           </form>
         </div>
+      </div>
 
-        <div className="section">
-          <h3>Your Applications</h3>
-          {applications.length === 0 ? (
-            <p>No applications found.</p>
-          ) : (
-            <ul className="app-list">
+      {/* Applications Section */}
+      <h3 style={{ marginTop: '32px' }}>Your Applications</h3>
+      <div className="card">
+        {applications.length === 0 ? (
+          <p>No applications found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>Applied On</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
               {applications.map(app => (
-                <li key={app.id} className={`app-item ${app.status.toLowerCase()}`}>
-                  <div className="app-info">
-                    <strong>{app.job.title}</strong>
-                    <span className="status-badge">{app.status}</span>
-                  </div>
-                  <small>Applied on: {new Date(app.appliedAt).toLocaleDateString()}</small>
-                  {app.status === 'OFFERED' && app.offer && (
-                    <div className="offer-actions">
-                      <p><strong>Offer Received!</strong></p>
-                      <button onClick={() => respondToOffer(app.offer.id, 'ACCEPTED')}>Accept</button>
-                      <button onClick={() => respondToOffer(app.offer.id, 'REJECTED')}>Reject</button>
-                    </div>
-                  )}
-                  {app.status === 'ACCEPTED' && <p className="success-text">Offer Accepted! 🎉</p>}
-                </li>
+                <tr key={app.id}>
+                  <td>{app.job.title}</td>
+                  <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
+                  <td>
+                    <span className={`badge ${app.status === 'ACCEPTED' ? 'success' :
+                        app.status === 'REJECTED' ? 'danger' :
+                          app.status === 'OFFERED' ? 'info' : 'warning'
+                      }`}>
+                      {app.status}
+                    </span>
+                  </td>
+                  <td>
+                    {app.status === 'OFFERED' && app.offer && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => respondToOffer(app.offer.id, 'ACCEPTED')}>Accept</button>
+                        <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => respondToOffer(app.offer.id, 'REJECTED')}>Reject</button>
+                      </div>
+                    )}
+                    {app.status === 'ACCEPTED' && <span>🎉 Offer Accepted</span>}
+                  </td>
+                </tr>
               ))}
-            </ul>
-          )}
-        </div>
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -31,74 +31,63 @@ export default function PlacementCellDashboard() {
 
   return (
     <div className="dashboard-container">
-      <h2>Placement Cell Dashboard</h2>
-      <nav className="dashboard-nav">
-        <Link to="/admin/create-user">Manage Users</Link>
-        <Link to="/admin/approve-jobs">Approve Jobs</Link>
-      </nav>
-      <div className="dashboard-content">
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>Total Students</h3>
-            <p>{stats?.totalStudents || 0}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Total Jobs</h3>
-            <p>{stats?.totalJobs || 0}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Applications</h3>
-            <p>{stats?.totalApplications || 0}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Offers</h3>
-            <p>{stats?.totalOffers || 0}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Placed</h3>
-            <p>{stats?.placedStudents || 0}</p>
-          </div>
+      <h2 style={{ marginBottom: '24px', color: 'var(--primary)' }}>Placement Cell Dashboard</h2>
+
+      {/* Stats Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '2rem', color: 'var(--primary)', margin: '0 0 8px 0' }}>{stats?.totalStudents || 0}</h3>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Students</p>
         </div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '2rem', color: 'var(--primary)', margin: '0 0 8px 0' }}>{stats?.totalJobs || 0}</h3>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Jobs</p>
+        </div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '2rem', color: 'var(--primary)', margin: '0 0 8px 0' }}>{stats?.totalApplications || 0}</h3>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Applications</p>
+        </div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '2rem', color: 'var(--primary)', margin: '0 0 8px 0' }}>{stats?.totalOffers || 0}</h3>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Offers</p>
+        </div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <h3 style={{ fontSize: '2rem', color: 'var(--primary)', margin: '0 0 8px 0' }}>{stats?.placedStudents || 0}</h3>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Placed</p>
+        </div>
+      </div>
 
-        <div className="users-section">
-          <h3>Registered Students</h3>
-          {students.length === 0 ? <p>No students found.</p> : (
-            <table className="data-table">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
+        {/* Recent Offers */}
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Recent Offers</h3>
+          {offers.length === 0 ? (
+            <p>No offers generated yet.</p>
+          ) : (
+            <table>
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Roll No</th>
-                  <th>Branch</th>
-                  <th>CGPA</th>
+                  <th>Student</th>
+                  <th>Company</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Issued On</th>
                 </tr>
               </thead>
               <tbody>
-                {students.map(u => (
-                  <tr key={u.id}>
-                    <td>{u.email}</td>
-                    <td>{u.student?.rollNo || 'N/A'}</td>
-                    <td>{u.student?.branch || 'N/A'}</td>
-                    <td>{u.student?.cgpa || 'N/A'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          <h3>Registered Recruiters</h3>
-          {recruiters.length === 0 ? <p>No recruiters found.</p> : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Company Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recruiters.map(u => (
-                  <tr key={u.id}>
-                    <td>{u.email}</td>
-                    <td>{u.recruiter?.companyName || 'N/A'}</td>
+                {offers.map(offer => (
+                  <tr key={offer.id}>
+                    <td>{offer.application.student.user.email}</td>
+                    <td>{offer.application.job.postedBy?.companyName || 'N/A'}</td>
+                    <td>{offer.application.job.title}</td>
+                    <td>
+                      <span className={`badge ${offer.status === 'ACCEPTED' ? 'success' :
+                          offer.status === 'REJECTED' ? 'danger' : 'warning'
+                        }`}>
+                        {offer.status}
+                      </span>
+                    </td>
+                    <td>{new Date(offer.issuedOn).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -106,33 +95,54 @@ export default function PlacementCellDashboard() {
           )}
         </div>
 
-        <h3>Recent Offers</h3>
-        {offers.length === 0 ? (
-          <p>No offers generated yet.</p>
-        ) : (
-          <table className="offers-table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Company</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Issued On</th>
-              </tr>
-            </thead>
-            <tbody>
-              {offers.map(offer => (
-                <tr key={offer.id}>
-                  <td>{offer.application.student.user.email}</td>
-                  <td>{offer.application.job.postedBy?.companyName || 'N/A'}</td>
-                  <td>{offer.application.job.title}</td>
-                  <td>{offer.status}</td>
-                  <td>{new Date(offer.issuedOn).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        {/* Users Lists */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Registered Students</h3>
+            {students.length === 0 ? <p>No students found.</p> : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Roll No</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.slice(0, 5).map(u => (
+                    <tr key={u.id}>
+                      <td>{u.email}</td>
+                      <td>{u.student?.rollNo || 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {students.length > 5 && <p style={{ textAlign: 'center', marginTop: '16px', color: 'var(--text-muted)' }}>Showing 5 of {students.length}</p>}
+          </div>
+
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Registered Recruiters</h3>
+            {recruiters.length === 0 ? <p>No recruiters found.</p> : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Company</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recruiters.slice(0, 5).map(u => (
+                    <tr key={u.id}>
+                      <td>{u.email}</td>
+                      <td>{u.recruiter?.companyName || 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {recruiters.length > 5 && <p style={{ textAlign: 'center', marginTop: '16px', color: 'var(--text-muted)' }}>Showing 5 of {recruiters.length}</p>}
+          </div>
+        </div>
       </div>
     </div>
   );

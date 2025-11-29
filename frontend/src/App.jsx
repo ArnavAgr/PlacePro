@@ -1,23 +1,26 @@
-import React from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
-import Login from './pages/Login'
-import Home from './pages/Home'
-import AdminCreateUser from './pages/AdminCreateUser'
-import CreateJob from './pages/CreateJob'
-import JobsList from './pages/JobsList'
-import PrivateRoute from './utils/PrivateRoute'
-import { getRole, logout } from './services/auth'
-import StudentSignUp from './pages/StudentSignUp'
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import axios, { getRole, logout } from './services/auth';
+import PrivateRoute from './components/PrivateRoute';
+import Layout from './components/Layout';
+
+// Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import StudentSignUp from './pages/StudentSignUp';
 import StudentDashboard from './pages/StudentDashboard';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import PlacementCellDashboard from './pages/PlacementCellDashboard';
+import JobsList from './pages/JobsList';
+import CreateJob from './pages/CreateJob';
+import AdminCreateUser from './pages/AdminCreateUser';
 import ManageApplications from './pages/ManageApplications';
 import ApproveJobs from './pages/ApproveJobs';
 
 export default function App() {
-  const [role, setRole] = React.useState(getRole());
+  const [role, setRole] = useState(getRole());
 
-  React.useEffect(() => {
+  useEffect(() => {
     function handleAuthChange() {
       setRole(getRole());
     }
@@ -26,22 +29,7 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ padding: 20 }}>
-      <nav style={{ marginBottom: 20 }}>
-        <Link to="/">Home</Link> {' | '}
-        {role === 'STUDENT' && <Link to="/student/dashboard">Dashboard</Link>}
-        {role === 'RECRUITER' && <Link to="/recruiter/dashboard">Dashboard</Link>}
-        {role === 'PLACEMENT_CELL' && <Link to="/placement-cell/dashboard">Dashboard</Link>}
-        {!role ? (
-          <>
-            <Link to="/login">Login</Link> {' | '}
-            <Link to="/sign-up">Sign Up</Link>
-          </>
-        ) : (
-          <button onClick={() => { logout(); window.location.href = '/'; }}>Logout</button>
-        )}
-      </nav>
-
+    <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -74,6 +62,6 @@ export default function App() {
           <PrivateRoute allowedRoles={['RECRUITER']}><ManageApplications /></PrivateRoute>
         } />
       </Routes>
-    </div>
+    </Layout>
   );
 }

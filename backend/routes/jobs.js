@@ -40,6 +40,21 @@ router.get('/pending', verifyToken, requireRole('PLACEMENT_CELL'), async (req, r
   res.json(jobs);
 });
 
+// List approved (active/closed) jobs - only PLACEMENT_CELL
+router.get('/approved', verifyToken, requireRole('PLACEMENT_CELL'), async (req, res) => {
+  const jobs = await prisma.job.findMany({
+    where: {
+      status: { in: ['ACTIVE', 'CLOSED'] }
+    },
+    include: {
+      postedBy: { select: { companyName: true } },
+      _count: { select: { applications: true } }
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json(jobs);
+});
+
 // Approve job - only PLACEMENT_CELL
 router.post('/:id/approve', verifyToken, requireRole('PLACEMENT_CELL'), async (req, res) => {
   const id = req.params.id;
