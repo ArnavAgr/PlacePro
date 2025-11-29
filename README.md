@@ -77,3 +77,8 @@ The application will be accessible at the URL shown (usually `http://localhost:5
 ## Troubleshooting
 - **"Unknown argument" error**: Run `npx prisma generate` in the backend folder.
 - **Port already in use**: If port 4000 or 5173 is busy, the app will try the next available port. Check the terminal output.
+
+
+## To open Prisma Studio 
+
+- Navigate to backend folder and run `npx prisma studio`
